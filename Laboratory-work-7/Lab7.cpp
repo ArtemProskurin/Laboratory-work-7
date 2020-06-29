@@ -2,6 +2,7 @@
 #include <conio.h>
 #include <stdlib.h>
 #include <locale.h>
+#include <math.h>
 #define N 5
 void input_matr(int a[N][N])
 {
@@ -26,10 +27,62 @@ void input_matr_file(int a[N][N]) {
 		fclose(fp);
 	}
 }
+
+float y_rec(float *x, int y, bool check, int index)
+{
+	int dc1, g;
+	double cc1;
+	if (check == 0)
+	{
+		for (int i = 0; i < N; i++)
+		{
+			if (x[index] > x[i])
+			{
+				index = i;
+			}
+		}
+		check = 1;
+	}
+	if (check == 1)
+	{
+		if (index != N - 2)
+		{
+			dc1 = modf(x[index + 1], &cc1);
+			g = static_cast<int>(cc1);
+			if (g % 2 == 0)
+			{
+				y = x[index + 1] * y_rec(x, y, check, index + 1);
+				return y;
+			}
+			else
+			{
+				y = y_rec(x, y, check, index + 1);
+				return y;
+			}
+		}
+		else if (index == N - 2)
+		{
+			{
+				dc1 = modf(x[index + 1], &cc1);
+				g = static_cast<int>(cc1);
+				if (g % 2 == 0)
+				{
+					y = x[index + 1];
+					return y;
+				}
+				else
+				{
+					return y = 1;
+				}
+			}
+		}
+	}
+	return y;
+}
 float *mas_x(int(*a)[N], float *x,
 	void(*pfunc)(int[N][N]))
 {
-	int i, j,b = 0, y = 0;
+	int i, j, b = 0, y = 0;
 	float sum;
 	pfunc(a);
 	for (i = 0; i < N; i++)
@@ -37,20 +90,32 @@ float *mas_x(int(*a)[N], float *x,
 		sum = 0;
 		for (j = 0; j < N; ++j)
 		{
-			sum+= a[i][j];
+			sum += a[i][j];
 		}
-		b = j - i-1;
-		for (j = N-1; j >= 0; j--)
+		b = j - i - 1;
+		for (j = N - 1; j >= 0; j--)
 		{
 			if (j != i)
 			{
 				sum += a[j][b];
 			}
 		}
-		x[i] = sum/(N*2-1);
+		x[i] = sum / (N * 2 - 1);
+	}
+	y = y_rec(x, y, 0, 0);
+	if (y == 1)
+	{
+		printf("Все элементы нечетные после первого минимального!!!!");
+		printf("\n");
+	}
+	else
+	{
+		printf("Y=%f", y);
+		printf("\n");
 	}
 	return x;
 }
+
 void output(const float x[], const int a[N][N])
 {
 	int i, j;
@@ -94,6 +159,6 @@ int main()
 		break;
 	case 2: pfunc = &input_matr_file;
 	}
-	output(mas_x(a, x, pfunc),a);
+	output(mas_x(a, x, pfunc), a);
 	_getch();
 }
